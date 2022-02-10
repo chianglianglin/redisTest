@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class TaskJobDetailCacheServiceImpl implements TaskJobDetailCacheService {
+public class TaskJobDetailCacheServiceImpl extends Thread implements TaskJobDetailCacheService {
 
 
 	@SuppressWarnings("rawtypes")
@@ -82,7 +82,7 @@ public class TaskJobDetailCacheServiceImpl implements TaskJobDetailCacheService 
 			taskJobDetails.get(i).setId(null);
 		}
 		List<TaskJobDetail> taskJobDetailList = new ArrayList<>();
-		int count = 50;
+		int count = 100;
 		for (int i = 0; i < count; i++) {
 			taskJobDetailList.addAll(taskJobDetails);
 
@@ -90,7 +90,12 @@ public class TaskJobDetailCacheServiceImpl implements TaskJobDetailCacheService 
 		redisTemplate.opsForList().leftPushAll(cacheName, taskJobDetailList);
 	}
 
-//	private int[] sum(int[] nums,int target){
+	@Override
+	public void run() {
+		super.run();
+	}
+
+	//	private int[] sum(int[] nums,int target){
 //		HashMap<Integer, Integer> map = new HashMap<>();
 //		for (int i = 0; i < nums.length; i++) {
 //			int x = target - nums[i];
