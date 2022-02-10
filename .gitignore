@@ -3,7 +3,7 @@
 .project
 .settings
 
-#src/main/resources/application.yml
+src/main/resources/application.yml
 
 .vscode
 .factorypath
