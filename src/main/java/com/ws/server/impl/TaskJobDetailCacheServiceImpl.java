@@ -1,22 +1,20 @@
 package com.ws.server.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.ws.project.model.bo.TaskJobDetailBo;
 import com.ws.project.model.po.TaskJobDetail;
 //import com.ws.project.model.po.UrlJobId;
 import com.ws.repository.TaskJobDetailRepository;
 import com.ws.repository.TaskJobRepository;
 import com.ws.repository.TaskRepository;
 import com.ws.server.TaskJobDetailCacheService;
-import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +34,7 @@ public class TaskJobDetailCacheServiceImpl extends Thread implements TaskJobDeta
 	@Autowired
 	private TaskJobDetailRepository taskJobDetailRepository;
 
+	private static final String cacheName1 = "try_taskjob";
 	private static final String cacheName = "taskjob-save-cache";
 	private static final String myCacheName = "taskjob";
 	private static final String myCacheName2 = "taskjobbackup";
@@ -59,12 +58,29 @@ public class TaskJobDetailCacheServiceImpl extends Thread implements TaskJobDeta
 			}
 		}
 		List<TaskJobDetail> taskJobDetailList = new ArrayList<>();
-		int count = 100;
-		for (int i = 0; i < count; i++) {
-			taskJobDetailList.addAll(taskJobDetails);
+//		for (int i = 0; i < 2; i++) {
+//			taskJobDetailList.addAll(taskJobDetails);
+//		}
 
+		int count = 100;
+		Long time1,time2;
+		time1 = System.currentTimeMillis();
+		for (int i = 0; i < count; i++) {
+//			taskJobDetailList.addAll(taskJobDetails);
+//			task(taskJobDetails);
 		}
-		redisTemplate.opsForList().leftPushAll(cacheName, taskJobDetailList);
+		time2 = System.currentTimeMillis();
+		System.out.println("doSomething()花了：" +(time2-time1));
+
+//		for(TaskJobDetail taskJobDetail: taskJobDetailList){
+//
+//			Thread thr = new Thread(() ->{
+//				redisTemplate.opsForValue().set(cacheName,taskJobDetail);
+//				System.out.println(getName());
+//			});
+//			thr.start();
+//		}
+//		redisTemplate.opsForList().leftPushAll(cacheName, taskJobDetailList);
 		//占存在遠端資料KEY為myCacheName
 //		List<TaskJobDetail> taskJobDetails= taskJobDetailRepository.selectHundredTaskJobDetail(1000);
 //		for (TaskJobDetail taskjob: taskJobDetails){
@@ -74,25 +90,52 @@ public class TaskJobDetailCacheServiceImpl extends Thread implements TaskJobDeta
 //		redisTemplate.opsForList().leftPushAll(myCacheName,taskJobDetails);
 	}
 
+
+
 	@Override
-	public void taskJobDetailPushCache2(){
+	@Async("sendJobExecutor")
+	public void taskJobDetailPushCache2(List<TaskJobDetail> taskJobDetails){
+		long time2;
+		String threadName = Thread.currentThread().getName();
+//		System.out.println(threadName + ":get employee data start");
+		redisTemplate.opsForList().leftPushAll(cacheName,taskJobDetails);
+		time2 = System.currentTimeMillis();
+		System.out.println(threadName + ":get employee data end" + "time" + time2);
+	}
 
-		List<TaskJobDetail> taskJobDetails = taskJobDetailRepository.findAll();
-		for (int i = 0; i < 2000; i++) {
-			taskJobDetails.get(i).setId(null);
-		}
+	@Override
+	public void piperLineRedis() {
+//		ShardRedisClient src = new ShardRedisClient();
+	}
+
+	@Override
+	public void taskJobDetailGetDetail() {
+		List<TaskJobDetail> taskJobDetails = taskJobDetailRepository.selectHundredTaskJobDetail(2000);
 		List<TaskJobDetail> taskJobDetailList = new ArrayList<>();
-		int count = 100;
-		for (int i = 0; i < count; i++) {
+		for (int i = 0; i < 50; i++) {
 			taskJobDetailList.addAll(taskJobDetails);
-
 		}
-		redisTemplate.opsForList().leftPushAll(cacheName, taskJobDetailList);
+		redisTemplate.opsForList().leftPushAll(cacheName,taskJobDetailList);
 	}
 
 	@Override
 	public void run() {
 		super.run();
+	}
+
+	private void task(List<TaskJobDetail> taskJobDetails,int i){
+//		System.out.println();
+//		AtomicInteger count = new AtomicInteger();
+		Thread thr = new Thread(() ->{
+			Long time2;
+//			time1 = System.currentTimeMillis();
+//			System.out.println("child thread start"+time1);
+			redisTemplate.opsForList().leftPushAll(cacheName,taskJobDetails);
+//				System.out.println(getName()+taskJobDetails.toString());
+			time2 = System.currentTimeMillis();
+			System.out.println("child thread "+i+" finished "+time2);
+		});
+		thr.start();
 	}
 
 	//	private int[] sum(int[] nums,int target){
