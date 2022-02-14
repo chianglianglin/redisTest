@@ -16,4 +16,6 @@ public interface TaskJobDetailCacheService {
 		void piperLineRedis();
 
 		void taskJobDetailGetDetail();
+
+		void putOneTaskJobDetail(TaskJobDetail taskJobDetail);
 }

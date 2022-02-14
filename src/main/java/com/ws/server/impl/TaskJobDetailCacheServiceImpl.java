@@ -7,6 +7,7 @@ import com.ws.repository.TaskJobDetailRepository;
 import com.ws.repository.TaskJobRepository;
 import com.ws.repository.TaskRepository;
 import com.ws.server.TaskJobDetailCacheService;
+//import com.ws.utils.redisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -98,7 +99,8 @@ public class TaskJobDetailCacheServiceImpl extends Thread implements TaskJobDeta
 		long time2;
 		String threadName = Thread.currentThread().getName();
 //		System.out.println(threadName + ":get employee data start");
-		redisTemplate.opsForList().leftPushAll(cacheName,taskJobDetails);
+//		redisTemplate.opsForList().leftPushAll(cacheName,taskJobDetails);
+//		redisUtil.pushList(taskJobDetails);
 		time2 = System.currentTimeMillis();
 		System.out.println(threadName + ":get employee data end" + "time" + time2);
 	}
@@ -119,9 +121,21 @@ public class TaskJobDetailCacheServiceImpl extends Thread implements TaskJobDeta
 	}
 
 	@Override
+	@Async("sendJobExecutor")
+	public void putOneTaskJobDetail(TaskJobDetail taskJobDetail) {
+		long time2;
+		String threadName = Thread.currentThread().getName();
+		redisTemplate.opsForList().leftPush(cacheName,taskJobDetail);
+		time2 = System.currentTimeMillis();
+		System.out.println(threadName + ":get employee data end" + "time" + time2);
+	}
+
+	@Override
 	public void run() {
 		super.run();
 	}
+
+
 
 	private void task(List<TaskJobDetail> taskJobDetails,int i){
 //		System.out.println();
