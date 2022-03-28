@@ -10,9 +10,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -33,13 +31,12 @@ public class testController {
 		ExecutorService eService = Executors.newFixedThreadPool(10);
 		TaskJobDetail taskJobDetail = new TaskJobDetail(11, 1l, "sdfwe", "sfwe", "2.2.2.2", "232..323.", "dwefw", 111, 23l, "wefww", "dfwefwf", new Date(),
 				new Date(), "fwefwe", "sfwefw", "wefwf", "dwfef", "fwefw", "wfewf");
-		List<TaskJobDetail> taskJobDetailList = new ArrayList<>();
-		Long time1,time2;
+		Long time1, time2;
 		time1 = System.currentTimeMillis();
 		System.out.println("mutlithread start" + time1);
 		for (int i = 0; i < count; i++) {
 
-			eService.execute(() ->{
+			eService.execute(() -> {
 				redisPutMethod(taskJobDetail);
 			});
 		}
@@ -47,11 +44,10 @@ public class testController {
 		eService.awaitTermination(1, TimeUnit.MINUTES);
 
 		time2 = System.currentTimeMillis();
-		Long totalTime = (time2 - time1)/1000;
+		Long totalTime = (time2 - time1) / 1000;
 		System.out.println("花了：" + totalTime + " 秒");
 
-		return new TimeCountVo("花了：" + totalTime + " 秒",count);
-
+		return new TimeCountVo("花了：" + totalTime + " 秒", count);
 
 
 	}
@@ -61,7 +57,7 @@ public class testController {
 	public TimeCountVo popTaskDetailCache() throws InterruptedException {
 
 
-		Long time1,time2;
+		Long time1, time2;
 		time1 = System.currentTimeMillis();
 		int totalCount = 0;
 
@@ -73,15 +69,16 @@ public class testController {
 		}
 
 		time2 = System.currentTimeMillis();
-		Long totalTime = (time2 - time1)/1000;
+		Long totalTime = (time2 - time1) / 1000;
 		System.out.println("花了：" + totalTime + " 秒");
-		return new TimeCountVo("花了：" + totalTime + " 秒",totalCount);
+		return new TimeCountVo("花了：" + totalTime + " 秒", totalCount);
 	}
 
-	private void redisPutMethod(TaskJobDetail taskJobDetail){
-		redisTemplate.opsForList().leftPush(cacheName,taskJobDetail);
+	private void redisPutMethod(TaskJobDetail taskJobDetail) {
+		redisTemplate.opsForList().leftPush(cacheName, taskJobDetail);
 	}
-	private void redisPopMethod(){
+
+	private void redisPopMethod() {
 		if (redisTemplate.hasKey(cacheName)) {
 			while (redisTemplate.opsForList().size(cacheName) > 0) {
 				redisTemplate.opsForList().rightPop(cacheName);
