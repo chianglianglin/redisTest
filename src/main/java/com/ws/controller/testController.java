@@ -82,19 +82,23 @@ public class testController {
 	@PostMapping("popTaskDetailCache")
 	public TimeCountVo popTaskDetailCache() throws InterruptedException {
 
+		ExecutorService eService = Executors.newFixedThreadPool(10);
+
 		Long time1,time2;
 		time1 = System.currentTimeMillis();
-		int count = 0;
-		if (redisTemplate.hasKey(cacheName)) {
-			while (redisTemplate.opsForList().size(cacheName) > 0) {
-				redisTemplate.opsForList().rightPop(cacheName);
-				count++;
-			}
+		int count = 10;
+		for (int i = 0; i < count; i++) {
+
+			eService.execute(() ->{
+				redisPopMethod();
+			});
 		}
+		eService.shutdown();
+		eService.awaitTermination(1, TimeUnit.MINUTES);
 		time2 = System.currentTimeMillis();
 		Long totalTime = (time2 - time1)/1000;
 		System.out.println("花了：" + totalTime + " 秒");
-		return new TimeCountVo("花了：" + totalTime + " 秒",count);
+		return new TimeCountVo("花了：" + totalTime + " 秒",0);
 	}
 
 	private void redisPutMethod(TaskJobDetail taskJobDetail){
