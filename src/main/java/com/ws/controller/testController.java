@@ -1,24 +1,19 @@
 package com.ws.controller;
 
-import com.ws.config.AsyncConfiguration;
-import com.ws.project.model.po.Task;
+
 import com.ws.project.model.po.TaskJobDetail;
 import com.ws.project.model.vo.TimeCountVo;
-import com.ws.repository.TaskJobDetailRepository;
-import com.ws.repository.TaskRepository;
 import com.ws.server.TaskJobDetailCacheService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -28,11 +23,6 @@ import java.util.concurrent.TimeUnit;
 @RestController
 public class testController {
 	private static final String cacheName = "taskjob-save-cache";
-
-	@Autowired
-	private TaskRepository taskRepository;
-	@Autowired
-	private TaskJobDetailRepository taskJobDetailRepository;
 
 	@Autowired
 	private RedisTemplate redisTemplate;
@@ -51,10 +41,8 @@ public class testController {
 	public TimeCountVo putTaskDetailCache(int count) throws InterruptedException {
 
 		ExecutorService eService = Executors.newFixedThreadPool(10);
-		TaskJobDetail taskJobDetail = taskJobDetailRepository.selectOneTaskJobDetail();
-		if (taskJobDetail != null){
-			taskJobDetail.setId(null);
-		}
+		TaskJobDetail taskJobDetail = new TaskJobDetail(11, 1l, "sdfwe", "sfwe", "2.2.2.2", "232..323.", "dwefw", 111, 23l, "wefww", "dfwefwf", new Date(),
+				new Date(), "fwefwe", "sfwefw", "wefwf", "dwfef", "fwefw", "wfewf");
 		List<TaskJobDetail> taskJobDetailList = new ArrayList<>();
 		Long time1,time2;
 		time1 = System.currentTimeMillis();
@@ -82,23 +70,30 @@ public class testController {
 	@PostMapping("popTaskDetailCache")
 	public TimeCountVo popTaskDetailCache() throws InterruptedException {
 
-		ExecutorService eService = Executors.newFixedThreadPool(10);
+//		ExecutorService eService = Executors.newFixedThreadPool(10);
 
 		Long time1,time2;
 		time1 = System.currentTimeMillis();
-		int count = 10;
-		for (int i = 0; i < count; i++) {
-
-			eService.execute(() ->{
-				redisPopMethod();
-			});
+		int totalCount = 0;
+//		int count = 10;
+//		for (int i = 0; i < count; i++) {
+		if (redisTemplate.hasKey(cacheName)) {
+			while (redisTemplate.opsForList().size(cacheName) > 0) {
+				redisTemplate.opsForList().rightPop(cacheName);
+				totalCount++;
+			}
 		}
-		eService.shutdown();
-		eService.awaitTermination(1, TimeUnit.MINUTES);
+
+//			eService.execute(() ->{
+//				redisPopMethod();
+//			});
+//		}
+//		eService.shutdown();
+//		eService.awaitTermination(1, TimeUnit.MINUTES);
 		time2 = System.currentTimeMillis();
 		Long totalTime = (time2 - time1)/1000;
 		System.out.println("花了：" + totalTime + " 秒");
-		return new TimeCountVo("花了：" + totalTime + " 秒",0);
+		return new TimeCountVo("花了：" + totalTime + " 秒",totalCount);
 	}
 
 	private void redisPutMethod(TaskJobDetail taskJobDetail){
