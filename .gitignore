@@ -11,3 +11,5 @@ src/main/resources/application.yml
 
 src/test/java/test/
 
+*.iml
+.idea/*
