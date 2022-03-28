@@ -3,7 +3,6 @@ package com.ws.controller;
 
 import com.ws.project.model.po.TaskJobDetail;
 import com.ws.project.model.vo.TimeCountVo;
-import com.ws.server.TaskJobDetailCacheService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,15 +25,6 @@ public class testController {
 
 	@Autowired
 	private RedisTemplate redisTemplate;
-
-	@Autowired
-	private TaskJobDetailCacheService taskJobDetailCacheService;
-
-//	@ApiOperation(value = "put task", notes = "")
-//	@PostMapping("putDBTask")
-//	public void putTask(@RequestBody Task task) {
-//		taskRepository.save(task);
-//	}
 
 	@ApiOperation(value = "put taskDetail")
 	@PostMapping("putTaskDetailCache")
@@ -70,13 +60,11 @@ public class testController {
 	@PostMapping("popTaskDetailCache")
 	public TimeCountVo popTaskDetailCache() throws InterruptedException {
 
-//		ExecutorService eService = Executors.newFixedThreadPool(10);
 
 		Long time1,time2;
 		time1 = System.currentTimeMillis();
 		int totalCount = 0;
-//		int count = 10;
-//		for (int i = 0; i < count; i++) {
+
 		if (redisTemplate.hasKey(cacheName)) {
 			while (redisTemplate.opsForList().size(cacheName) > 0) {
 				redisTemplate.opsForList().rightPop(cacheName);
@@ -84,12 +72,6 @@ public class testController {
 			}
 		}
 
-//			eService.execute(() ->{
-//				redisPopMethod();
-//			});
-//		}
-//		eService.shutdown();
-//		eService.awaitTermination(1, TimeUnit.MINUTES);
 		time2 = System.currentTimeMillis();
 		Long totalTime = (time2 - time1)/1000;
 		System.out.println("花了：" + totalTime + " 秒");
@@ -107,52 +89,4 @@ public class testController {
 		}
 	}
 
-//	@ApiOperation(value = "test one thread redis taskJobDetail")
-//	@PostMapping("oneThread")
-//	public void redisOneThread(){
-//		Long time1,time2;
-//		time1 = System.currentTimeMillis();
-//		taskJobDetailCacheService.taskJobDetailGetDetail();
-//		time2 = System.currentTimeMillis();
-//		System.out.println("doController()花了：" + (time2 - time1));
-//	}
-//
-//	@ApiOperation(value = "test  redisutils taskJobDetail")
-//	@PostMapping("redisUtils")
-//	public void redisUtils(){
-//		List<TaskJobDetail> taskJobDetails = taskJobDetailRepository.selectHundredTaskJobDetail(1);
-//
-//		for (int i = 0; i < taskJobDetails.size(); i++) {
-//			taskJobDetails.get(i).setId(null);
-//		}
-//		Long time1;
-//		time1 = System.currentTimeMillis();
-//		System.out.println("mutlithread start" + time1);
-//
-//		int count = 10000;
-//		for (int i = 0; i < count; i++) {
-//
-//			taskJobDetailCacheService.taskJobDetailPushCache2(taskJobDetails);
-////			task(taskJobDetails, i);
-////			taskJobDetailList.addAll(taskJobDetails);
-//		}
-//	}
-//
-//	public int findContentChildren(int[] g, int[] s) {
-//		boolean[] successContent = new boolean[s.length];
-//		for (int i = 0; i < successContent.length; i++) {
-//			successContent[i] = false;
-//		}
-//		int successContentChildren = 0;
-//
-//		for(int i = 0 ; i < s.length; i++){
-//			for (int j = 0; j < g.length; j++) {
-//				if (s[i] == g[j] && successContent[i]==false){
-//					successContent[i] = true;
-//					successContentChildren++;
-//				}
-//			}
-//		}
-//		return successContentChildren;
-//	}
 }

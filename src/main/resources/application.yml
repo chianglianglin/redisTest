@@ -33,34 +33,3 @@ spring:
 server:
   port: 8083
 
-thread-pool:
-  core:
-    core-pool-size: 10
-    max-pool-size: 500
-    queue-capacity: 20000
-    thread-name-prefix: CORE-
-    keep-alive-seconds: 200
-  send-job:
-    core-pool-size: 10
-    max-pool-size: 50
-    queue-capacity: 1000
-    thread-name-prefix: JOB-
-    keep-alive-seconds: 150
-  db-save:
-    core-pool-size: 100
-    max-pool-size: 500
-    queue-capacity: 100000
-    thread-name-prefix: DB-
-    keep-alive-seconds: 150
-  server:
-    core-pool-size: 2
-    max-pool-size: 2
-    queue-capacity: 2
-    thread-name-prefix: SERVER-
-    keep-alive-seconds: 10
-  redis:
-    core-pool-size: 50
-    max-pool-size: 50
-    queue-capacity: 100000
-    thread-name-prefix: THREAD-REDIS-
-    keep-alive-seconds: 10
